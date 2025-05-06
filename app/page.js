@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider } from "ethers";
 import { connectFactory } from "../lib/factory";
 import { useRouter } from "next/navigation";
 import WalletConnect from "../components/Wallet";
