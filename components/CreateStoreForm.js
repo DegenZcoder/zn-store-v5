@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider } from "ethers";
 import toast from "react-hot-toast";
 import { connectFactory } from "../lib/factory";
 
