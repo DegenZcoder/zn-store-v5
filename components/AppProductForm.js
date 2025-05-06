@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider } from "ethers";
 import toast from "react-hot-toast";
 
 export default function Wallet({ onConnect }) {
