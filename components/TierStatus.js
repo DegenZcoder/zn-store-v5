@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider } from "ethers";
 import { FACTORY_ABI, FACTORY_ADDRESS } from "../lib/factory";
 
 const TIER_LABELS = ["None", "Bronze", "Silver", "Gold", "Platinum", "Diamond"];
