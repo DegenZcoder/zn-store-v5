@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { BrowserProvider } from "ethers";
 import WalletConnect from "../../components/Wallet";
 import StoreHeader from "../../components/StoreHeader";
 import ProductList from "../../components/ProductList";
