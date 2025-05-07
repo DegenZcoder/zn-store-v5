@@ -57,12 +57,13 @@ export default function HomePage() {
         onDisconnect={handleDisconnect}
       />
 
-      {walletAddress && !storeAddress && (
-        <div className="mt-8 w-full max-w-lg">
-          <p className="text-gray-400 mb-4 text-center">No store found. Please create your store below.</p>
-          <CreateStoreForm walletAddress={walletAddress} />
-        </div>
-      )}
+      {walletAddress && (!storeAddress || storeAddress === "0x0000000000000000000000000000000000000000") && (
+  <div className="mt-8 w-full max-w-lg">
+    <p className="text-gray-400 mb-4 text-center">No store found. Please create your store below.</p>
+    <CreateStoreForm walletAddress={walletAddress} />
+  </div>
+)}
+
     </main>
   );
 }
