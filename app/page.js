@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BrowserProvider } from "ethers";
+import { ethers, BrowserProvider } from "ethers";
 import { connectFactory } from "../lib/factory";
 import { useRouter } from "next/navigation";
 import WalletConnect from "../components/Wallet";
 import CreateStoreForm from "../components/CreateStoreForm";
+import { checkZNBalance } from "../lib/zncheck";
 
 export default function HomePage() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [storeAddress, setStoreAddress] = useState(null);
+  const [znBalance, setZnBalance] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleConnect = async () => {
@@ -28,22 +31,39 @@ export default function HomePage() {
   const handleDisconnect = () => {
     setWalletAddress(null);
     setStoreAddress(null);
+    setZnBalance(null);
   };
 
   useEffect(() => {
-    if (!walletAddress) return;
+    const fetchStoreAndBalance = async () => {
+      if (!walletAddress) return;
 
-    const fetchStore = async () => {
-      const factory = connectFactory();
-      const userStore = await factory.userStores(walletAddress);
+      setIsLoading(true);
 
-      if (userStore !== "0x0000000000000000000000000000000000000000") {
-        setStoreAddress(userStore);
-        router.push("/store");
+      try {
+        // Check ZN Balance
+        const balance = await checkZNBalance(walletAddress);
+        setZnBalance(balance);
+
+        // Check store
+        const factory = connectFactory();
+        const userStore = await factory.userStores(walletAddress);
+
+        if (userStore !== "0x0000000000000000000000000000000000000000") {
+          setStoreAddress(userStore);
+          router.push("/store");
+        } else {
+          setStoreAddress(null);
+        }
+      } catch (err) {
+        console.error("Error fetching store or balance", err);
+        setStoreAddress(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchStore();
+    fetchStoreAndBalance();
   }, [walletAddress, router]);
 
   return (
@@ -57,13 +77,22 @@ export default function HomePage() {
         onDisconnect={handleDisconnect}
       />
 
-      {walletAddress && (!storeAddress || storeAddress === "0x0000000000000000000000000000000000000000") && (
-  <div className="mt-8 w-full max-w-lg">
-    <p className="text-gray-400 mb-4 text-center">No store found. Please create your store below.</p>
-    <CreateStoreForm walletAddress={walletAddress} />
-  </div>
-)}
+      {walletAddress && znBalance !== null && (
+        <p className="text-green-400">
+          ZN Balance: {znBalance} ZN
+        </p>
+      )}
 
+      {walletAddress && isLoading && (
+        <p className="text-gray-400 mt-4">Loading store information...</p>
+      )}
+
+      {walletAddress && !isLoading && (!storeAddress || storeAddress === "0x0000000000000000000000000000000000000000") && (
+        <div className="mt-8 w-full max-w-lg">
+          <p className="text-gray-400 mb-4 text-center">No store found. Please create your store below.</p>
+          <CreateStoreForm walletAddress={walletAddress} />
+        </div>
+      )}
     </main>
   );
 }
