@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { connectFactory } from "../lib/factory";
 import { useRouter } from "next/navigation";
 import WalletConnect from "../components/Wallet";
+import CreateStoreForm from "../components/CreateStoreForm";
 
 export default function HomePage() {
   const [walletAddress, setWalletAddress] = useState(null);
@@ -26,9 +27,9 @@ export default function HomePage() {
 
   const handleDisconnect = () => {
     setWalletAddress(null);
+    setStoreAddress(null);
   };
 
-  // Check store after wallet connected
   useEffect(() => {
     if (!walletAddress) return;
 
@@ -38,7 +39,7 @@ export default function HomePage() {
 
       if (userStore !== "0x0000000000000000000000000000000000000000") {
         setStoreAddress(userStore);
-        router.push("/store"); // Nếu có store → tự vào dashboard
+        router.push("/store"); // Nếu có store → vào dashboard
       }
     };
 
@@ -57,15 +58,10 @@ export default function HomePage() {
       />
 
       {walletAddress && !storeAddress && (
-        <p className="text-gray-400 mt-4">
-          No store found yet.{" "}
-          <span
-            onClick={() => router.push("/store")}
-            className="text-purple-400 underline cursor-pointer hover:text-purple-300"
-          >
-            Create your store now
-          </span>
-        </p>
+        <div className="mt-8 w-full max-w-lg">
+          <p className="text-gray-400 mb-4 text-center">No store found yet. Please create your store below.</p>
+          <CreateStoreForm walletAddress={walletAddress} />
+        </div>
       )}
     </main>
   );
