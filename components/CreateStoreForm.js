@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserProvider } from "ethers";
 import toast from "react-hot-toast";
 import { connectFactory } from "../lib/factory";
+import { getUserZNBalance } from "../lib/zncheck";
 
 const TIERS = [
   { value: 1, label: "Bronze" },
@@ -17,6 +18,19 @@ export default function CreateStoreForm({ walletAddress }) {
   const [storeName, setStoreName] = useState("");
   const [selectedTier, setSelectedTier] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
+  const [znBalance, setZnBalance] = useState(0);
+
+  // Load ZN Balance
+  useEffect(() => {
+    if (!walletAddress) return;
+
+    const loadBalance = async () => {
+      const balance = await getUserZNBalance(walletAddress);
+      setZnBalance(balance);
+    };
+
+    loadBalance();
+  }, [walletAddress]);
 
   const handleCreateStore = async () => {
     if (!storeName || storeName.length < 6 || storeName.length > 35) {
@@ -24,9 +38,14 @@ export default function CreateStoreForm({ walletAddress }) {
       return;
     }
 
+    if (znBalance < 10000) {
+      toast.error("You need at least 10,000 ZN to create a store.");
+      return;
+    }
+
     try {
       setIsCreating(true);
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const factory = connectFactory(signer);
 
@@ -46,6 +65,10 @@ export default function CreateStoreForm({ walletAddress }) {
   return (
     <div className="p-6 bg-gray-900 rounded-lg space-y-4">
       <h2 className="text-2xl text-purple-400 font-bold">Create Your Store</h2>
+
+      <p className="text-gray-300">
+        Your ZN Balance: <span className="text-purple-400">{znBalance.toLocaleString()} ZN</span> (You need 10,000 ZN)
+      </p>
 
       <input
         type="text"
