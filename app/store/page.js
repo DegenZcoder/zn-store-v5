@@ -19,11 +19,11 @@ export default function StorePage() {
 
   const handleConnect = async () => {
     if (!window.ethereum) {
-      alert("Please install MetaMask");
+      alert("Please install MetaMask to continue.");
       return;
     }
 
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = await provider.getSigner();
     const address = await signer.getAddress();
@@ -52,6 +52,7 @@ export default function StorePage() {
 
     const userStore = connectUserStore(userStoreAddr);
     const [owner, name, znBalance, maxProducts, feePerDayBP, maxListingDays] = await userStore.getStoreInfo();
+
     setStoreName(name);
     setStoreInfo({
       owner,
@@ -77,16 +78,22 @@ export default function StorePage() {
         onDisconnect={handleDisconnect}
       />
 
-      {!walletAddress && <p className="text-gray-400">Please connect wallet.</p>}
+      {!window.ethereum && (
+        <p className="text-red-400">Please install MetaMask to use ZN Store.</p>
+      )}
+
+      {window.ethereum && !walletAddress && (
+        <p className="text-gray-400">Please connect your wallet to continue.</p>
+      )}
 
       {walletAddress && !storeAddress && (
         <div>
-          <p className="text-gray-400 mb-4">No store yet. Please create your store.</p>
+          <p className="text-gray-400 mb-4">No store found. Create your store to get started.</p>
           <CreateStoreForm walletAddress={walletAddress} />
         </div>
       )}
 
-      {walletAddress && storeAddress && (
+      {walletAddress && storeAddress && storeInfo && (
         <>
           <StoreHeader storeName={storeName} storeAddress={storeAddress} storeInfo={storeInfo} />
           <ProductList storeAddress={storeAddress} />
