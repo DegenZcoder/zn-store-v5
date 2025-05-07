@@ -7,11 +7,11 @@ import { connectFactory } from "../lib/factory";
 import { getUserZNBalance } from "../lib/zncheck";
 
 const TIERS = [
-  { value: 1, label: "Bronze" },
-  { value: 2, label: "Silver" },
-  { value: 3, label: "Gold" },
-  { value: 4, label: "Platinum" },
-  { value: 5, label: "Diamond" }
+  { value: 1, label: "Bronze", minZN: 10000 },
+  { value: 2, label: "Silver", minZN: 50000 },
+  { value: 3, label: "Gold", minZN: 100000 },
+  { value: 4, label: "Platinum", minZN: 500000 },
+  { value: 5, label: "Diamond", minZN: 1000000 }
 ];
 
 export default function CreateStoreForm({ walletAddress }) {
@@ -19,6 +19,8 @@ export default function CreateStoreForm({ walletAddress }) {
   const [selectedTier, setSelectedTier] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [znBalance, setZnBalance] = useState(0);
+
+  const requiredZN = TIERS.find(t => t.value === selectedTier)?.minZN || 0;
 
   // Load ZN Balance
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function CreateStoreForm({ walletAddress }) {
       return;
     }
 
-    if (znBalance < 10000) {
-      toast.error("You need at least 10,000 ZN to create a store.");
+    if (znBalance < requiredZN) {
+      toast.error(`You need at least ${requiredZN.toLocaleString()} ZN for ${TIERS.find(t => t.value === selectedTier).label} tier.`);
       return;
     }
 
@@ -67,7 +69,8 @@ export default function CreateStoreForm({ walletAddress }) {
       <h2 className="text-2xl text-purple-400 font-bold">Create Your Store</h2>
 
       <p className="text-gray-300">
-        Your ZN Balance: <span className="text-purple-400">{znBalance.toLocaleString()} ZN</span> (You need 10,000 ZN)
+        Your ZN Balance: <span className="text-purple-400">{znBalance.toLocaleString()} ZN</span><br />
+        Required for selected tier ({TIERS.find(t => t.value === selectedTier).label}): <span className="text-purple-400">{requiredZN.toLocaleString()} ZN</span>
       </p>
 
       <input
@@ -90,10 +93,10 @@ export default function CreateStoreForm({ walletAddress }) {
 
       <button
         onClick={handleCreateStore}
-        disabled={isCreating}
+        disabled={isCreating || znBalance < requiredZN}
         className="w-full py-3 bg-purple-600 rounded hover:bg-purple-700 text-white disabled:opacity-50"
       >
-        {isCreating ? "Creating..." : "Create Store"}
+        {isCreating ? "Creating..." : znBalance < requiredZN ? `Insufficient ZN` : "Create Store"}
       </button>
     </div>
   );
